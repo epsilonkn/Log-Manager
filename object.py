@@ -29,7 +29,11 @@ class Info:
         self.module = module
         self.function = function
         self.caller = caller
-        self.message = message
+        self.message : str= message
+
+    def __str__(self):
+        return f"Entrée du {self.time} | par {self.function}, {self.module} | origine : {self.caller}" \
+        f"\n {self.message}"
 
 
 class Warning:
@@ -41,6 +45,10 @@ class Warning:
         self.caller = caller
         self.message = message
 
+    def __str__(self):
+        return f"Entrée du {self.time} | par {self.function}, {self.module} | origine : {self.caller}" \
+        f"\n{self.message.replace("\t", "")}"
+
 
 class Error:
 
@@ -50,3 +58,7 @@ class Error:
         self.function = function
         self.caller = caller
         self.message = message
+
+    def __str__(self):
+        return f"Entrée du {self.time} | par {self.function}, {self.module} | origine : {self.caller}" \
+        f"\n {self.message}"
