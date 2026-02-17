@@ -50,7 +50,6 @@ class EntryItem(ct.CTkFrame):
                  corner_radius = None, 
                  border_width = None, 
                  bg_color = "transparent", 
-                 fg_color = ct.ThemeManager.theme["CTkButton"]["fg_color"][ct.get_appearance_mode() == "Dark"], 
                  border_color = None, 
                  background_corner_colors = None, 
                  overwrite_preferred_drawing_method = None, 
@@ -75,7 +74,7 @@ class interface(ct.CTk):
     def __init__(self, fg_color = None, **kwargs):
         super().__init__(fg_color, **kwargs)
 
-        self.geometry("1400x800")
+        self.geometry("1200x800")
         self.title("Log reader")
 
         self.logFilePath : Path | None = None
@@ -100,7 +99,7 @@ class interface(ct.CTk):
     def search_frame(self):
         self.clear()
         self.bt = ct.CTkButton(self, width=200, height=100, text="ouvrir un fichier", command=self.choose_log)
-        self.bt.place(x = 600, y = 350)
+        self.bt.place(x = 500, y = 350)
 
 
     def choose_log(self):
@@ -120,10 +119,10 @@ class interface(ct.CTk):
         self.title = ct.CTkLabel(self, text = f"Liste des entrées de : {self.logFileName}",
                                  font= ct.CTkFont("arial", size = 30, weight="bold"))
 
-        self.listframe = ct.CTkScrollableFrame(self, 1300, 500)
+        self.listframe = ct.CTkScrollableFrame(self, 1100, 500)
         self.listframe.grid_columnconfigure(0, weight=1)
 
-        self.dashboard = ct.CTkScrollableFrame(self, 1300, 200)
+        self.dashboard = ct.CTkScrollableFrame(self, 1100, 200)
         self.dashboard.grid_columnconfigure(0, weight=1)
         self.dashboard.grid_columnconfigure(1, weight=1)
         self.dashboard.grid_columnconfigure(2, weight=1)
@@ -138,13 +137,11 @@ class interface(ct.CTk):
 
     def session_detail(self, session : Session):
         self.clear()
-        top = ct.CTkFrame(self, 1300, 50)
-        event_f = ct.CTkScrollableFrame(self, 1000, 700, label_text=f"{len(session.infos) + len(session.warning) + len(session.errors)} Events")
-        info_f = ct.CTkScrollableFrame(self, 300, 700, label_text="Infos")
+        top = ct.CTkFrame(self, 1100, 50)
+        event_f = ct.CTkScrollableFrame(self, 1100, 700, label_text=f"{len(session.infos) + len(session.warning) + len(session.errors)} Events")
 
         top.grid(row = 0, column = 0, columnspan = 2, sticky = 'nsew', padx = 40) 
         event_f.grid(row = 1, column = 0, padx = [40, 0], sticky = 'nsew') 
-        info_f.grid(row = 1, column = 1, padx = [0, 40], sticky = 'nsew') 
 
         return_bt = ct.CTkButton(top, text = "Retour", command=self.overview)
         session_text = ct.CTkLabel(top, text = f"Session du {session.time}")
