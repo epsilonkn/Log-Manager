@@ -20,6 +20,7 @@ class Log:
 
         Args:
             cwd_path (str, optional): chemin vers le dossier devant contenir le log. Defaults to "./".
+            log_name (str, optional): Nom du fichier de Logs. Defaults to "module.log".
         """
 
         self.path = cwd_path
@@ -39,6 +40,8 @@ class Log:
 
         Args:
             cwd (str, optional): chemin vers le dossier devant contenir le log. Defaults to "./".
+            log_name (str, optional): Nom du fichier de Logs. Defaults to "module.log".
+            module_version (float, optional): Version du module appelant le Log. Defaults to -1.
         """
         if not cls._instance :
             cls._instance = Log(cwd, log_name)
@@ -55,6 +58,12 @@ class Log:
 
     @classmethod
     def close_log(cls):
+        """
+        Ferme le log à l'appel du module l'ayant ouvert
+
+        Raises:
+            LogNotInstanciatedError: Erreur renvoyée si le Log n'a pas été ouvert avant fermeture
+        """
         if not cls._instance :
             raise LogNotInstanciatedError("Le log n'a pas été ouvert, fermeture impossible")
         else :
@@ -62,7 +71,14 @@ class Log:
 
 
     @classmethod
-    def _write_in_log(cls, message):
+    def _write_in_log(cls, message : str):
+        """
+        Méthode d'écriture dans le log, 
+        appelée uniquement par les méthodes d'ajout d'une entrée
+
+        Args:
+            message (str): message à écrire dans le log
+        """
         with open(cls._instance.f, 'a', encoding='utf-8') as f :
             f.writelines(message)
 
@@ -76,6 +92,27 @@ class Log:
                 function : str = "unknown",
                 caller : str = "module"
               ) -> None:
+        """
+        Ecrit une erreur dans le log
+
+        Args:
+            error (BaseException): erreur renvoyée par le module appelant
+            addon (str, optional): message complémentaire précisant l'erreur. Defaults to "".
+            timestamp (bool, optional): horodatage de l'entrée. Defaults to True.
+            module_name (str, optional): nom du module appelant la méthode. Defaults to "unknown".
+            function (str, optional): nom de la fonction appelant la méthode. Defaults to "unknown".
+            caller (str, optional): nom de l'entité appelant la méthode. Defaults to "module".
+
+        Example:
+
+            erreur envoyée par la fonction main d'un fichier script.py :
+            error(Exception("example"), "this is an add-on", module_name="script.py", function="main", caller="module")
+
+            erreur envoyée par le developpeur du module script.py dans la fonction main :
+            error(Exception("example"), "this action is prohibited", module_name="script.py", function="main", caller="dev")
+
+
+        """
         message = "\n\t<error>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
         message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
@@ -94,6 +131,17 @@ class Log:
              caller : str = "module",
              tag : str | None = None
              ) -> None:
+        """
+        Methode d'écriture d'une information ou plusieurs dans le log
+
+        Args:
+            *input (str): messages à écrire dans le log, il peut y en avoir plusieurs à la suite
+            timestamp (bool, optional): horodatage de l'entrée. Defaults to True.
+            module_name (str, optional): nom du module appelant la méthode. Defaults to "unknown".
+            function (str, optional): nom de la fonction appelant la méthode. Defaults to "unknown".
+            caller (str, optional): nom de l'entité appelant la méthode. Defaults to "module".
+            tag (str | None, optional): tag precisant le type de message, peut être "resultat", "operation", "reponse". Defaults to None.
+        """
         addtag = f" tag={tag}" if tag else ""
         message = f"\n\t<info{addtag}>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
@@ -113,6 +161,16 @@ class Log:
                 function : str = "unknown",
                 caller : str = "module"
               ) -> None:
+        """
+        Méthode d'écriture d'un warning dans le log
+
+        Args:
+            warning_message (str, optional): Warning à écrire dans le log. Defaults to "".
+            timestamp (bool, optional): horodatage de l'entrée. Defaults to True.
+            module_name (str, optional): nom du module appelant la méthode. Defaults to "unknown".
+            function (str, optional): nom de la fonction appelant la méthode. Defaults to "unknown".
+            caller (str, optional): nom de l'entité appelant la méthode. Defaults to "module".
+        """
         message = "\n\t<warning>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
         message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
@@ -128,7 +186,7 @@ if __name__ == "__main__" :
     Log.info("ceci est un message", "c'en est un autre", module_name="test.py", function="main", caller="admin")
     Log.info("encore un autre message", module_name="test.py", function="main", caller="admin", tag = "default")
     try : 
-        raise Exception("ceci est une erreur au pif")
+        raise Exception("ceci est une erreur")
     except Exception as e :
         Log.error(e, module_name="test.py", function="main", caller="sys")
     Log.close_log()
