@@ -37,6 +37,36 @@ class SessionsItem(ct.CTkFrame):
         self.version.grid(column = 0, row = 1, sticky = "w", padx = 20)
         self.entries.grid(column = 0, row = 2, sticky = "w", padx = 20)
 
+
+
+class EntryItem(ct.CTkFrame):
+
+    def __init__(self, 
+                 master, 
+                 trigger = None,
+                 entry_object : Entry = None,
+                 width = 200, 
+                 height = 200, 
+                 corner_radius = None, 
+                 border_width = None, 
+                 bg_color = "transparent", 
+                 fg_color = ct.ThemeManager.theme["CTkButton"]["fg_color"][ct.get_appearance_mode() == "Dark"], 
+                 border_color = None, 
+                 background_corner_colors = None, 
+                 overwrite_preferred_drawing_method = None, 
+                 **kwargs):
+        
+        colors = {Info : "#00DA7F", Warning :"#FF8800", Error : "#FF3333"}
+        fg_color = colors.get(entry_object.__class__)
+        super().__init__(master, width, height, corner_radius, border_width, bg_color, fg_color, border_color, background_corner_colors, overwrite_preferred_drawing_method, **kwargs)
+
+
+        text = ct.CTkLabel(self, text = entry_object.header(), anchor="w", compound = "left", text_color= "#FFFFFF")
+        text.grid(row = 0, column = 0, padx = 10, sticky = "w")
+
+        text = ct.CTkLabel(self, text = entry_object.get_message(), anchor="w", compound = "left", text_color= "#FFFFFF", wraplength=900)
+        text.grid(row = 1, column = 0, padx = 10, sticky = "w")
+
         
 
 
@@ -85,7 +115,7 @@ class interface(ct.CTk):
             self.overview()
 
 
-    def overview(self):
+    def overview(self):    
         self.clear()
         self.title = ct.CTkLabel(self, text = f"Liste des entrées de : {self.logFileName}",
                                  font= ct.CTkFont("arial", size = 30, weight="bold"))
@@ -109,15 +139,12 @@ class interface(ct.CTk):
     def session_detail(self, session : Session):
         self.clear()
         top = ct.CTkFrame(self, 1300, 50)
-        info_f = ct.CTkScrollableFrame(self, 650, 300, label_text=f"{len(session.infos)} Infos")
-        warning_f = ct.CTkScrollableFrame(self, 650, 300, label_text=f"{len(session.warning)} Warning")
-        error_f = ct.CTkScrollableFrame(self, 1300, 350, label_text=f"{len(session.errors)} Errors")
+        event_f = ct.CTkScrollableFrame(self, 1000, 700, label_text=f"{len(session.infos) + len(session.warning) + len(session.errors)} Events")
+        info_f = ct.CTkScrollableFrame(self, 300, 700, label_text="Infos")
 
         top.grid(row = 0, column = 0, columnspan = 2, sticky = 'nsew', padx = 40) 
-        info_f.grid(row = 1, column = 0, padx = [40, 0], sticky = 'nsew') 
-        warning_f.grid(row = 1, column = 1, padx = [0, 40], sticky = 'nsew') 
-        error_f.grid(row = 2, column = 0, columnspan = 2, padx = 40) 
-
+        event_f.grid(row = 1, column = 0, padx = [40, 0], sticky = 'nsew') 
+        info_f.grid(row = 1, column = 1, padx = [0, 40], sticky = 'nsew') 
 
         return_bt = ct.CTkButton(top, text = "Retour", command=self.overview)
         session_text = ct.CTkLabel(top, text = f"Session du {session.time}")
@@ -125,18 +152,9 @@ class interface(ct.CTk):
         return_bt.grid(row = 0, column = 0, padx = 10, pady = 5)
         session_text.grid(row = 0, column = 1, padx = 10, pady = 5)
 
-        for i, info in enumerate(session.infos) :
-            f = ct.CTkFrame(info_f, 450, fg_color=ct.ThemeManager.theme["CTkButton"]["fg_color"][ct.get_appearance_mode() == "Dark"], corner_radius = 10)
-            f.grid(row = i, column = 1, sticky = 'nsew', pady = 5, ipady = 5)
-            text = ct.CTkLabel(f, text = info.__str__(), anchor="w", compound = "left", text_color= "#FFFFFF")
-            text.pack(padx = 10)
-
-        for warning in session.warning :
-            pass
-
-        for error in session.errors:
-            pass
-
+        for i, entry in enumerate(session.entries) :
+            f = EntryItem(event_f, width = 900, entry_object = entry, corner_radius = 10)
+            f.grid(row = i, column = 0, sticky = 'nsew', pady = 5, ipady = 5)
 
 
     def list_sessions(self):
@@ -176,23 +194,20 @@ class interface(ct.CTk):
                 return sum([len(ses.errors) for ses in self.sessions])
 
 
-    def list_entries(self, session_str : str, session_obj : Session, entry_type : str):
+    def list_entries(self, session_str : str, session_obj : Session):
         """
         lists all the infos parsed in a session
         """
-        start_point = 0
-        end_point = 0
-        while end_point != -1 :
-            start_point = session_str.find(f"<{entry_type}>", end_point)
-            end_point = session_str.find(f"</{entry_type}>", start_point)
-            if end_point != -1 :
-                cut = session_str[start_point:end_point]
-                time = cut[cut.index("<timestamp>"):cut.index("</timestamp>")].replace("<timestamp>", "")
-                module = cut[cut.index("<module>"):cut.index("</module>")].replace("<module>", "")
-                function = cut[cut.index("<function>"):cut.index("</function>")].replace("<function>", "")
-                caller = cut[cut.index("<caller>"):cut.index("</caller>")].replace("<caller>", "")
-                message = cut[cut.index("<message>"):cut.index("</message>")].replace("<message>", "")
-                match entry_type :
+
+        def create_entry(start, end, entry_type):
+            cut = session_str[start:end]
+            time = cut[cut.index("<timestamp>"):cut.index("</timestamp>")].replace("<timestamp>", "")
+            module = cut[cut.index("<module>"):cut.index("</module>")].replace("<module>", "")
+            function = cut[cut.index("<function>"):cut.index("</function>")].replace("<function>", "")
+            caller = cut[cut.index("<caller>"):cut.index("</caller>")].replace("<caller>", "")
+            message = cut[cut.index("<message>"):cut.index("</message>")].replace("<message>", "")
+
+            match entry_type :
                     case 'info':
                         session_obj.add_info(time, module, function, caller, message)
                     case 'warning':
@@ -200,6 +215,25 @@ class interface(ct.CTk):
                     case 'error':
                         session_obj.add_error(time, module, function, caller, message)
 
+
+        pointer = 0
+        while pointer < len(session_str) :
+            if session_str[pointer] == "<" :
+                end_point = pointer + 1
+                if session_str.find("<info>", pointer) == pointer :
+                    end_point = session_str.find("</info>", pointer)
+                    create_entry(pointer, end_point, "info")
+                elif session_str.find("<warning>", pointer) == pointer :
+                    end_point = session_str.find("</warning>", pointer)
+                    create_entry(pointer, end_point, "warning")
+
+                elif session_str.find("<error>", pointer) == pointer :
+                    end_point = session_str.find("</error>", pointer)
+                    create_entry(pointer, end_point, "error")
+
+                pointer = end_point
+            else :
+                pointer += 1
 
     def parse_log(self):
         session_list = []
@@ -211,9 +245,7 @@ class interface(ct.CTk):
             time = init[init.index("<timestamp>"):init.index("</timestamp>")].replace("<timestamp>", "")
             version = init[init.index("<version>"):init.index("</version>")].replace("<version>", "")
             session = Session(time, version)
-            self.list_entries(sessions, session, 'info')
-            self.list_entries(sessions, session, 'error')
-            self.list_entries(sessions, session, 'warning')
+            self.list_entries(sessions, session)
             session_list.append(session)
         self.sessions = session_list
         return session_list
