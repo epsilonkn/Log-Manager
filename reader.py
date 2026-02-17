@@ -198,6 +198,8 @@ class interface(ct.CTk):
         self.dashboard.grid_columnconfigure(2, weight=1)
 
         self.option_f = ct.CTkFrame(self, width=1100)
+        for i in range(10):
+            self.option_f.grid_columnconfigure(i, weight=1)
 
         self.listframe = ct.CTkScrollableFrame(self, 1100, 500)
         self.listframe.grid_columnconfigure(0, weight=1)
@@ -209,10 +211,61 @@ class interface(ct.CTk):
 
         #---------------option_f ----------------------------
 
-        sort_info = ct.CTkOptionMenu(self.option_f)
+        options = ["défaut", "Croissant", "Décroissant"]
 
-        self.list_sessions(self.sessions)
+        lbl_main = ct.CTkLabel(self.option_f, text = "Trier par :")
+        lbl_main.grid(row = 0, column = 0, pady = 5, padx = 10, sticky = 'nsew')
+
+        lbl_info = ct.CTkLabel(self.option_f, text = "Info")
+        lbl_info.grid(row = 0, column = 1, pady = 5, padx = 10, sticky = 'nsew')
+        lbl_warn = ct.CTkLabel(self.option_f, text = "Warning")
+        lbl_warn.grid(row = 0, column = 3, pady = 5, padx = 10, sticky = 'nsew')
+        lbl_error = ct.CTkLabel(self.option_f, text = "Error")
+        lbl_error.grid(row = 0, column = 5, pady = 5, padx = 10, sticky = 'nsew')
+        lbl_date = ct.CTkLabel(self.option_f, text = "Date")
+        lbl_date.grid(row = 0, column = 7, pady = 5, padx = 10, sticky = 'nsew')
+
+
+        self.sort_info = ct.CTkOptionMenu(self.option_f, values = options)
+        self.sort_info.configure(command=lambda x, t = "info" : self._sort_choose(t, self.sort_info.get()))
+        self.sort_info.grid(row = 0, column = 2, pady = 5, padx = 10, sticky = 'nsew')
+
+        self.sort_warn = ct.CTkOptionMenu(self.option_f, values = options)
+        self.sort_warn.configure(command=lambda x, t = "warning" : self._sort_choose(t, self.sort_warn.get()))
+        self.sort_warn.grid(row = 0, column = 4, pady = 5, padx = 10, sticky = 'nsew')
+
+        self.sort_error = ct.CTkOptionMenu(self.option_f, values = options)
+        self.sort_error.configure(command=lambda x, t = "error" : self._sort_choose(t, self.sort_error.get()))
+        self.sort_error.grid(row = 0, column = 6, pady = 5, padx = 10, sticky = 'nsew')
+
+        self.sort_date = ct.CTkOptionMenu(self.option_f, values = options)
+        self.sort_date.configure(command=lambda x, t = "date" : self._sort_choose(t, self.sort_date.get()))
+        self.sort_date.grid(row = 0, column = 8, pady = 5, padx = 10, sticky = 'nsew')
+
+        self.reset = ct.CTkButton(self.option_f, text = "Réinitialiser", command=self.overview)
+        self.reset.grid(row = 0, column = 9, pady = 5, padx = 10, sticky = 'nsew')
+
+        self.list_sessions()
         self.create_dashboard()
+
+    
+    def _sort_choose(self, col_type, order):
+        match col_type :
+
+            case "info":
+                if order == "Croissant" : self.list_sessions(Sorter.sortInfoIncreasing(deepcopy(self.sessions)))
+                elif order == "Décroissant" : self.list_sessions(Sorter.sortInfoDecreasing(deepcopy(self.sessions)))
+            case "warning":
+                if order == "Croissant" : self.list_sessions(Sorter.sortWarningIncreasing(deepcopy(self.sessions)))
+                elif order == "Décroissant" : self.list_sessions(Sorter.sortWarningDecreasing(deepcopy(self.sessions)))
+            case "error":
+                if order == "Croissant" : self.list_sessions(Sorter.sortErrorIncreasing(deepcopy(self.sessions)))
+                elif order == "Décroissant" : self.list_sessions(Sorter.sortErrorDecreasing(deepcopy(self.sessions)))
+            case "date":
+                if order == "Croissant" : self.list_sessions(Sorter.sortByDate(deepcopy(self.sessions)))
+                elif order == "Décroissant" : self.list_sessions(Sorter.sortByDate(deepcopy(self.sessions)))
+        if order == "Défaut":
+            self.list_sessions(self.session_detail)
 
 
     def session_detail(self, session : Session):
@@ -238,6 +291,7 @@ class interface(ct.CTk):
         """
         function that lists all the sessions parsed in the log file
         """
+        self.clear(self.listframe)
         if session_list == [] :
             sessions = self.parse_log()
         else : sessions = session_list

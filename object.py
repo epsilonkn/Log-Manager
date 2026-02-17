@@ -16,9 +16,9 @@ class Session:
         date = re.sub(r"\s+", " ", date)
 
         if date : 
-            self.time_obj : datetime = datetime.strptime(date, "%b:%d:%Y")
+            self.time_obj : datetime = datetime.strptime(date, "%b %d %Y")
         else :
-            self.time_obj : datetime = datetime.strptime("Jan 5 2099", "%b:%d:%Y") 
+            self.time_obj : datetime = datetime.strptime("Jan 5 2099", "%b %d %Y") 
 
         self.entries : list[Entry] = []
         self.infos : list[Entry] = []
