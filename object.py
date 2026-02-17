@@ -3,9 +3,23 @@ import re
 
 class Session:
 
+    mois_asctime = {
+        "Jan": 1,"Feb": 2,"Mar": 3,"Apr": 4,"May": 5,"Jun": 6,"Jul": 7,"Aug": 8,"Sep": 9,"Oct": 10,"Nov": 11,"Dec": 12
+        }
+
     def __init__(self, time, version):
         self.versions = version
         self.time = time
+
+        date = re.sub(r"^[a-zA-Z]*\s", "", time)
+        date = re.sub(r"\s\d{2}:\d{2}:\d{2}", "", date)
+        date = re.sub(r"\s+", " ", date)
+
+        if date : 
+            self.time_obj : datetime = datetime.strptime(date, "%b:%d:%Y")
+        else :
+            self.time_obj : datetime = datetime.strptime("Jan 5 2099", "%b:%d:%Y") 
+
         self.entries : list[Entry] = []
         self.infos : list[Entry] = []
         self.warning : list[Entry] = []

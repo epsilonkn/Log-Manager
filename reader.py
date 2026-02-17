@@ -3,6 +3,7 @@ from tkinter import filedialog
 import customtkinter as ct
 from object import *
 from pathlib import Path
+from copy import deepcopy
 
 class interface:...
 
@@ -66,7 +67,77 @@ class EntryItem(ct.CTkFrame):
         text = ct.CTkLabel(self, text = entry_object.get_message(), anchor="w", compound = "left", text_color= "#FFFFFF", wraplength=900)
         text.grid(row = 1, column = 0, padx = 10, sticky = "w")
 
-        
+
+class Sorter:
+
+    @staticmethod
+    def sortErrorDecreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].errors) > len(view[y-1].errors) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+
+
+    @staticmethod
+    def sortWarningDecreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].warning) > len(view[y-1].warning) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+
+
+    @staticmethod
+    def sortInfoDecreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].infos) > len(view[y-1].infos) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+    
+
+    @staticmethod
+    def sortErrorIncreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].errors) < len(view[y-1].errors) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+    
+
+    @staticmethod
+    def sortWarningIncreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].warning) < len(view[y-1].warning) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+    
+
+    @staticmethod
+    def sortInfoIncreasing(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and len(view[y].infos) < len(view[y-1].infos) :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+    
+    @staticmethod
+    def sortByDate(view : list[Session]):
+        for i in range(1, len(view)):
+            y = i
+            while y > 0 and view[y].time_obj > view[y-1].time_obj :
+                view[y], view[y-1] = view[y-1], view[y]
+                y -= 1
+        return view
+    
 
 
 class interface(ct.CTk):
@@ -81,6 +152,7 @@ class interface(ct.CTk):
         self.logFileName : str = ""
 
         self.sessions : list[Session] = []
+        self.sessions_view : list[Session] = []
 
         if not self.logFilePath :
             self.search_frame()
@@ -112,26 +184,34 @@ class interface(ct.CTk):
             self.logFilePath = Path(path)
             self.logFileName = self.logFilePath.stem
             self.overview()
+        
 
 
     def overview(self):    
         self.clear()
         self.title = ct.CTkLabel(self, text = f"Liste des entrées de : {self.logFileName}",
                                  font= ct.CTkFont("arial", size = 30, weight="bold"))
-
-        self.listframe = ct.CTkScrollableFrame(self, 1100, 500)
-        self.listframe.grid_columnconfigure(0, weight=1)
-
+        
         self.dashboard = ct.CTkScrollableFrame(self, 1100, 200)
         self.dashboard.grid_columnconfigure(0, weight=1)
         self.dashboard.grid_columnconfigure(1, weight=1)
         self.dashboard.grid_columnconfigure(2, weight=1)
 
+        self.option_f = ct.CTkFrame(self, width=1100)
+
+        self.listframe = ct.CTkScrollableFrame(self, 1100, 500)
+        self.listframe.grid_columnconfigure(0, weight=1)
+
         self.title.pack(pady = 10)
         self.dashboard.pack()
+        self.option_f.pack()
         self.listframe.pack()
 
-        self.list_sessions()
+        #---------------option_f ----------------------------
+
+        sort_info = ct.CTkOptionMenu(self.option_f)
+
+        self.list_sessions(self.sessions)
         self.create_dashboard()
 
 
@@ -154,13 +234,13 @@ class interface(ct.CTk):
             f.grid(row = i, column = 0, sticky = 'nsew', pady = 5, ipady = 5)
 
 
-    def list_sessions(self):
+    def list_sessions(self, session_list : list = []):
         """
         function that lists all the sessions parsed in the log file
         """
-        if self.sessions == [] :
+        if session_list == [] :
             sessions = self.parse_log()
-        else : sessions = self.sessions
+        else : sessions = session_list
         for i, session in enumerate(sessions):
             SessionsItem(self.listframe, self.session_detail, session).grid(row = i, column = 0, sticky = 'nsew', pady = 5, padx = 10)
 
