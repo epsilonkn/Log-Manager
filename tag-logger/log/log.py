@@ -178,15 +178,3 @@ class Log:
         message += "\n\t</warning>"
 
         cls._write_in_log(message)
-
-
-if __name__ == "__main__" :
-
-    Log.start_log(module_version=2)
-    Log.info("ceci est un message", "c'en est un autre", module_name="test.py", function="main", caller="admin")
-    Log.info("encore un autre message", module_name="test.py", function="main", caller="admin", tag = "default")
-    try : 
-        raise Exception("ceci est une erreur")
-    except Exception as e :
-        Log.error(e, module_name="test.py", function="main", caller="sys")
-    Log.close_log()
