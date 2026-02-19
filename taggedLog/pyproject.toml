@@ -1,0 +1,21 @@
+[project]
+name = "taggedLog"
+version = "1.0.5"
+description = "structured log for python"
+dependencies = []
+authors = [{ name="epsilonkn" }]
+requires-python = ">=3.12"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+taggedLog = "taggedLog.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/epsilonkn/Log-Manager/tree/main"
+Issues = "https://github.com/epsilonkn/Log-Manager/issues"
