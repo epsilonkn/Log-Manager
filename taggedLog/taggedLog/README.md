@@ -9,6 +9,10 @@ Feel free to modify the code depending on the uses, and if you think somethin mi
 ## To use it : 
 the module is built to allow only one hidden instance of the Log object, so you don't have to instanciate the Log object.
 
+To call the module :
+
+    from taggedLog.log import Log
+
 To open the log :
 
     Log.start_log(...)
