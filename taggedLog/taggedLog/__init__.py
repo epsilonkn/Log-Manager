@@ -10,3 +10,4 @@
 
    read the docstrings of each method for further explainations
 """
+from .log import Log

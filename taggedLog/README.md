@@ -1,6 +1,6 @@
 # Doc
 
-Thank you for using the tag-logger package !
+Thank you for using the taggedLog package !
 
 This log module is meant to be as little and simple as possible, and to work on every project you want it on.
 

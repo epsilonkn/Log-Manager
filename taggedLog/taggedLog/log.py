@@ -1,5 +1,6 @@
 import os
 import time
+import traceback
 
 
 class LogNotInstanciatedError(BaseException):
@@ -85,7 +86,6 @@ class Log:
 
     @classmethod
     def error(cls, 
-                error : BaseException, 
                 addon : str = "",
                 timestamp : bool = True,
                 module_name : str = "unknown",
@@ -116,7 +116,7 @@ class Log:
         message = "\n\t<error>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
         message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
-        message += f"\n\t\t<message>line {error.__traceback__.tb_lineno}, {error.__str__()}, {addon}</message>"
+        message += f"\n\t\t<message>{traceback.format_exc()}\n{addon}\n</message>"
         message += "\n\t</error>"
 
         cls._write_in_log(message)
