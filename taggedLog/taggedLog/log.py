@@ -13,6 +13,11 @@ class Log:
 
     _instance = None
 
+    module_name : str = "unknown",
+    function_name : str = "unknown",
+    caller : str = "module"
+
+
 
     def __init__(self, cwd_path : str = "./", log_name : str = "module.log"):
         """
@@ -88,9 +93,9 @@ class Log:
     def error(cls, 
                 addon : str = "",
                 timestamp : bool = True,
-                module_name : str = "unknown",
-                function : str = "unknown",
-                caller : str = "module"
+                module_name : str | None = None,
+                function_name : str | None = None,
+                caller : str | None = None
               ) -> None:
         """
         Ecrit une erreur dans le log
@@ -113,9 +118,14 @@ class Log:
 
 
         """
+
+        module_name     = module_name   or cls.module_name
+        function_name   = function_name or cls.function_name
+        caller          = caller        or cls.caller
+
         message = "\n\t<error>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
-        message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
+        message += f"\n\t\t<module>{module_name}</module><function>{function_name}</function><caller>{caller}</caller>"
         message += f"\n\t\t<message>{traceback.format_exc()}\n{addon}\n</message>"
         message += "\n\t</error>"
 
@@ -125,11 +135,11 @@ class Log:
     @classmethod
     def info(cls, 
             *input : str, 
-             timestamp : bool = True,
-             module_name : str = "unknown",
-             function : str = "unknown",
-             caller : str = "module",
-             tag : str | None = None
+            timestamp : bool = True,
+            module_name : str | None = None,
+            function_name : str | None = None,
+            caller : str | None = None,
+            tag : str | None = None
              ) -> None:
         """
         Methode d'écriture d'une information ou plusieurs dans le log
@@ -142,10 +152,15 @@ class Log:
             caller (str, optional): nom de l'entité appelant la méthode. Defaults to "module".
             tag (str | None, optional): tag precisant le type de message, peut être "resultat", "operation", "reponse". Defaults to None.
         """
+
+        module_name     = module_name   or cls.module_name
+        function_name   = function_name or cls.function_name
+        caller          = caller        or cls.caller
+
         addtag = f" tag={tag}" if tag else ""
         message = f"\n\t<info{addtag}>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
-        message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
+        message += f"\n\t\t<module>{module_name}</module><function>{function_name}</function><caller>{caller}</caller>"
         message += "\n\t\t<message>"
         for msg in input :
             message += (str(msg) + "\n\t\t")
@@ -157,9 +172,9 @@ class Log:
     def warning(cls, 
                 warning_message : str = "",
                 timestamp : bool = True,
-                module_name : str = "unknown",
-                function : str = "unknown",
-                caller : str = "module"
+                module_name : str | None = None,
+                function_name : str | None = None,
+                caller : str | None = None
               ) -> None:
         """
         Méthode d'écriture d'un warning dans le log
@@ -171,9 +186,14 @@ class Log:
             function (str, optional): nom de la fonction appelant la méthode. Defaults to "unknown".
             caller (str, optional): nom de l'entité appelant la méthode. Defaults to "module".
         """
+
+        module_name     = module_name   or cls.module_name
+        function_name   = function_name or cls.function_name
+        caller          = caller        or cls.caller
+
         message = "\n\t<warning>"
         message += f"\n\t\t<timestamp>{time.asctime()}</timestamp>" if timestamp else ""
-        message += f"\n\t\t<module>{module_name}</module><function>{function}</function><caller>{caller}</caller>"
+        message += f"\n\t\t<module>{module_name}</module><function>{function_name}</function><caller>{caller}</caller>"
         message += f"\n\t\t<message>{warning_message}</message>"
         message += "\n\t</warning>"
 
